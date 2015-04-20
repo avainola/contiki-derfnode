@@ -81,6 +81,9 @@ void clock_adjust_ticks(clock_time_t howmany);
 /* However this results in disabling UART0. */
 #define RF230BB_CONF_LEDONPORTE1  0
 
+#define DE_RF_NODE 1
+#define STDOUT_TO_USB 1
+
 /* COM port to be used for SLIP connection. This is usually UART0, but see above */
 #if RF230BB_CONF_LEDONPORTE1
 #define SLIP_PORT RS232_PORT_1

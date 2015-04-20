@@ -88,6 +88,10 @@
 #include "net/rime/rime-udp.h"
 #endif
 
+#if DE_RF_NODE
+#include "usb.h"
+#endif
+
 #include "net/rime/rime.h"
 
 /* Track interrupt flow through mac, rdc and radio driver */
@@ -173,18 +177,27 @@ void initialize(void)
   watchdog_init();
   watchdog_start();
 
+#if DE_RF_NODE
+
+#if STDOUT_TO_USB
+usb_io_init();
+#endif /* STDOUT_TO_USB */
+
+#else /* DE_RF_NODE */
 /* The Raven implements a serial command and data interface via uart0 to a 3290p,
  * which could be duplicated using another host computer.
  */
 #if !RF230BB_CONF_LEDONPORTE1   //Conflicts with USART0
+
 #ifdef RAVEN_LCD_INTERFACE
   rs232_init(RS232_PORT_0, USART_BAUD_38400,USART_PARITY_NONE | USART_STOP_BITS_1 | USART_DATA_BITS_8);
   rs232_set_input(0,raven_lcd_serial_input);
-#else
+#else /* RAVEN_LCD_INTERFACE */
   /* Generic or slip connection on uart0 */
   rs232_init(RS232_PORT_0, USART_BAUD_38400,USART_PARITY_NONE | USART_STOP_BITS_1 | USART_DATA_BITS_8);
-#endif
-#endif
+#endif /* RAVEN_LCD_INTERFACE */
+
+#endif /* !RF230BB_CONF_LEDONPORTE1 */
 
   /* Second rs232 port for debugging or slip alternative */
   rs232_init(RS232_PORT_1, USART_BAUD_57600,USART_PARITY_NONE | USART_STOP_BITS_1 | USART_DATA_BITS_8);
@@ -194,6 +207,9 @@ void initialize(void)
 #else
   rs232_redirect_stdout(RS232_PORT_0);
 #endif
+
+#endif /* DE_RF_NODE */
+
   clock_init();
 
   if(MCUSR & (1<<PORF )) PRINTD("Power-on reset.\n");
