@@ -89,8 +89,11 @@
 #endif
 
 #if DE_RF_NODE
+#include "io_access.h"
 #include "usb.h"
-#endif
+#include "twi_master.h"
+#include "i2c_sensors_interface.h"
+#endif /* DE_RF_NODE */
 
 #include "net/rime/rime.h"
 

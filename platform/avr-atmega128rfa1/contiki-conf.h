@@ -81,8 +81,17 @@ void clock_adjust_ticks(clock_time_t howmany);
 /* However this results in disabling UART0. */
 #define RF230BB_CONF_LEDONPORTE1  0
 
+/* Define 1 if using deRFnode board */
 #define DE_RF_NODE 1
+
+/* Define 1 if want to get stdout to USB on deRFnode */
 #define STDOUT_TO_USB 1
+
+/* add LEDs to PORTB */
+#define PLATFORM_HAS_LEDS 1
+
+/* add button on PORTB7 */
+#define PLATFORM_HAS_BUTTON 1
 
 /* COM port to be used for SLIP connection. This is usually UART0, but see above */
 #if RF230BB_CONF_LEDONPORTE1
