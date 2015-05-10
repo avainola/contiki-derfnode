@@ -108,7 +108,6 @@ static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
 
 PROCESS_THREAD(broadcast_process, ev, data)
 {
-  static struct etimer et;
 
   PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
 
@@ -116,15 +115,12 @@ PROCESS_THREAD(broadcast_process, ev, data)
 
   broadcast_open(&broadcast, 129, &broadcast_call);
 
+  static struct etimer et;
+  etimer_set(&et, CLOCK_SECOND * 10);
+
   while(1) {
-//
-//    /* Send a broadcast every 30 seconds */
-    etimer_set(&et, CLOCK_SECOND * 10);
-//
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-//
-//    packetbuf_copyfrom("Im a sink!", 11);
-//    broadcast_send(&broadcast);
+    etimer_reset(&et);
   }
 
   PROCESS_END();
@@ -138,21 +134,23 @@ PROCESS_THREAD(unicast_process, ev, data)
     
   PROCESS_BEGIN();
 
+  printf("STAR-NODE started!\n");
+
   unicast_open(&unicast, 146, NULL /*&unicast_callbacks*/);
 
   memb_init(&sinkaddress);
 
-
+  static struct etimer et;
+  etimer_set(&et, CLOCK_SECOND * 17);
 
   while(1) {
-    static struct etimer et;
-    struct unicast_message msg;
 
-    etimer_set(&et, CLOCK_SECOND * 17);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
     if(sink_addr != 0)
     {
+      struct unicast_message msg;
+
       /* measure temperature */
       while(TMP102_WakeUp());
       while(TMP102_StartOneshotMeasurement());
@@ -179,6 +177,7 @@ PROCESS_THREAD(unicast_process, ev, data)
       packetbuf_copyfrom(&msg, sizeof(msg));
       unicast_send(&unicast, sink_addr);
     }
+    etimer_reset(&et);
   }
 
   PROCESS_END();

@@ -107,23 +107,24 @@ static const struct unicast_callbacks unicast_callbacks = {recv_uc};
 
 PROCESS_THREAD(broadcast_process, ev, data)
 {
-  static struct etimer et;
+
 
   PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
 
   PROCESS_BEGIN();
 
+  printf("STAR-SINK started!\n");
+
   broadcast_open(&broadcast, 129, NULL /*&broadcast_call*/);
 
+  static struct etimer et;
+  etimer_set(&et, CLOCK_SECOND * 30);
+
   while(1) {
-
-    /* Send a broadcast every 30 seconds */
-    etimer_set(&et, CLOCK_SECOND * 30);
-
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-
-    packetbuf_copyfrom("Im a sink!", 11);
+    packetbuf_copyfrom("I'm a sink!", 11);
     broadcast_send(&broadcast);
+    etimer_reset(&et);
   }
 
   PROCESS_END();
@@ -134,51 +135,16 @@ PROCESS_THREAD(broadcast_process, ev, data)
 PROCESS_THREAD(unicast_process, ev, data)
 {
   PROCESS_EXITHANDLER(unicast_close(&unicast);)
-    
   PROCESS_BEGIN();
 
   unicast_open(&unicast, 146, &unicast_callbacks);
 
-//  memb_init(&sinkaddress);
-
-
+  static struct etimer et;
+  etimer_set(&et, CLOCK_SECOND * 10);
 
   while(1) {
-    static struct etimer et;
-//    struct unicast_message msg;
-//
-    // while loop wait timer
-    etimer_set(&et, CLOCK_SECOND * 10);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-//
-//    if(sink_addr != 0)
-//    {
-//      // measure temperature
-//      while(TMP102_WakeUp());
-//      while(TMP102_StartOneshotMeasurement());
-//      while(TMP102_GetTemperature(&msg.temp, true));
-//      while(TMP102_PowerDown());
-//
-//      // measure luminosity
-//      while(ISL29020_WakeUp());
-//      ISL29020_StartOneshotMeasurement();
-//      // delay needed for correct luminosity measurement
-//      _delay_ms(100);
-//      while(ISL29020_GetLuminosity(&msg.lumi));
-//      while(ISL29020_PowerDown());
-//
-//      // measure acceleration
-//      while(BMA150_WakeUp());
-//      //read twice because 1st read after wake-up is trash
-//      while(BMA150_GetAcceleration(&msg.accel));
-//      while(BMA150_GetAcceleration(&msg.accel));
-//      while(BMA150_PowerDown());
-//
-//      printf("Sending data!\n");
-//
-//      packetbuf_copyfrom(&msg, sizeof(msg));
-//      unicast_send(&unicast, sink_addr);
-//    }
+    etimer_reset(&et);
   }
 
   PROCESS_END();

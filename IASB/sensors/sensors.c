@@ -1,8 +1,5 @@
 #include <stdio.h>
-//#include <stdint.h>
 #include <util/delay.h>
-//#include <avr/io.h>
-//#include <avr/interrupt.h>
 
 #include "contiki.h"
 #include "usb.h"
@@ -93,23 +90,44 @@ PROCESS(sensors_process, "Sensorsprocess");
 AUTOSTART_PROCESSES(&sensors_process);
 PROCESS_THREAD(sensors_process, ev, data)
 {
-
   PROCESS_BEGIN();
 
   /* initialize LEDs and stuff */
   io_init();
 
+  printf("Sensors application started!\n");
+
+  static struct etimer et;
+  static int led = 0;
+  etimer_set(&et, CLOCK_SECOND * 10);
+
   /* loop infinite */
   while(1)
   {
-	 static struct etimer et;
-     /* perform one measurement/printing cycle */
-     measure();
-     print_results();
-
-     etimer_set(&et, CLOCK_SECOND * 5);
-
-     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+	PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+	if (led == 0)
+	{
+		led_set(LED_0, LED_ON);
+		led_set(LED_1, LED_OFF);
+		led_set(LED_2, LED_OFF);
+	}
+	if (led == 1)
+	{
+		led_set(LED_1, LED_ON);
+		led_set(LED_0, LED_OFF);
+		led_set(LED_2, LED_OFF);
+	}
+	if (led == 2)
+	{
+		led_set(LED_2, LED_ON);
+		led_set(LED_1, LED_OFF);
+		led_set(LED_0, LED_OFF);
+	}
+	led++;
+    measure();
+    print_results();
+    if (led == 3) led = 0;
+    etimer_reset(&et);
   }
 
   PROCESS_END();
