@@ -89,11 +89,8 @@
 #endif
 
 #if DERFNODE_STDOUT_TO_USB
-//#include "io_access.h"
 #include "usb.h"
-//#include "twi_master.h"
-//#include "i2c_sensors_interface.h"
-#endif /* DE_RF_NODE */
+#endif /* DERFNODE_STDOUT_TO_USB */
 
 #include "net/rime/rime.h"
 
