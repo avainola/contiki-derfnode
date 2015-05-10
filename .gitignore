@@ -15,7 +15,7 @@
 *.sky
 *.wismote
 *.esb
-*.avr-atmega128rfa1
+#*.avr-atmega128rfa1
 *.avr-raven
 *.exp5438
 *.mbxxx

@@ -38,7 +38,7 @@
 #define PRINTA(...)
 #endif
 
-#define DEBUG 0
+#define DEBUG 1
 #if DEBUG
 #define PRINTD(FORMAT,args...) printf_P(PSTR(FORMAT),##args)
 #else
@@ -88,17 +88,17 @@
 #include "net/rime/rime-udp.h"
 #endif
 
-#if DE_RF_NODE
-#include "io_access.h"
+#if DERFNODE_STDOUT_TO_USB
+//#include "io_access.h"
 #include "usb.h"
-#include "twi_master.h"
-#include "i2c_sensors_interface.h"
+//#include "twi_master.h"
+//#include "i2c_sensors_interface.h"
 #endif /* DE_RF_NODE */
 
 #include "net/rime/rime.h"
 
 /* Track interrupt flow through mac, rdc and radio driver */
-//#define DEBUGFLOWSIZE 32
+#define DEBUGFLOWSIZE 32
 #if DEBUGFLOWSIZE
 uint8_t debugflowsize,debugflow[DEBUGFLOWSIZE];
 #define DEBUGFLOW(c) if (debugflowsize<(DEBUGFLOWSIZE-1)) debugflow[debugflowsize++]=c
@@ -180,13 +180,6 @@ void initialize(void)
   watchdog_init();
   watchdog_start();
 
-#if DE_RF_NODE
-
-#if STDOUT_TO_USB
-usb_io_init();
-#endif /* STDOUT_TO_USB */
-
-#else /* DE_RF_NODE */
 /* The Raven implements a serial command and data interface via uart0 to a 3290p,
  * which could be duplicated using another host computer.
  */
@@ -202,16 +195,20 @@ usb_io_init();
 
 #endif /* !RF230BB_CONF_LEDONPORTE1 */
 
+  /* Redirect stdout */
+#if DERFNODE_STDOUT_TO_USB
+usb_io_init();
+#else /* DERFNODE_STDOUT_TO_USB */
+
+#if RF230BB_CONF_LEDONPORTE1 || defined(RAVEN_LCD_INTERFACE)
   /* Second rs232 port for debugging or slip alternative */
   rs232_init(RS232_PORT_1, USART_BAUD_57600,USART_PARITY_NONE | USART_STOP_BITS_1 | USART_DATA_BITS_8);
-  /* Redirect stdout */
-#if RF230BB_CONF_LEDONPORTE1 || defined(RAVEN_LCD_INTERFACE)
   rs232_redirect_stdout(RS232_PORT_1);
 #else
   rs232_redirect_stdout(RS232_PORT_0);
 #endif
 
-#endif /* DE_RF_NODE */
+#endif /* DERFNODE_STDOUT_TO_USB */
 
   clock_init();
 

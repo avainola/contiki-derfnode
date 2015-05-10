@@ -98,6 +98,7 @@ extern "C" {
 
 
 void led_set(led_number_t led_nr, led_mode_t led_mode);
+void led_init(void);
 void io_init(void);
 button_state_t button_pressed(button_number_t button_nr);
 

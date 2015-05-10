@@ -24,9 +24,6 @@ static uint8_t status_led = 0;
 
 /* === PROTOTYPES ========================================================== */
 
-uint8_t read_io_byte(void);
-void write_io_byte(uint8_t data);
-
 /* === IMPLEMENTATION ====================================================== */
 
 /**

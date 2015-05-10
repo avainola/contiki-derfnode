@@ -81,11 +81,12 @@ void clock_adjust_ticks(clock_time_t howmany);
 /* However this results in disabling UART0. */
 #define RF230BB_CONF_LEDONPORTE1  0
 
-/* Define 1 if using deRFnode board */
-#define DE_RF_NODE 1
-
+#ifdef LOGTOUSB
 /* Define 1 if want to get stdout to USB on deRFnode */
-#define STDOUT_TO_USB 1
+#define DERFNODE_STDOUT_TO_USB 1
+#else
+#define DERFNODE_STDOUT_TO_USB 0
+#endif /* LOGTOUSB */
 
 /* add LEDs to PORTB */
 #define PLATFORM_HAS_LEDS 1
@@ -113,10 +114,10 @@ typedef unsigned long off_t;
 
 /* RADIOSTATS is used in rf230bb, clock.c and the webserver cgi to report radio usage */
 /* It has less overhead than ENERGEST */
-#define RADIOSTATS                1
+#define RADIOSTATS                0
 
 /* More extensive stats, via main loop printfs or webserver status pages */
-#define ENERGEST_CONF_ON          1
+#define ENERGEST_CONF_ON          0
 
 /* Packet statistics */
 typedef unsigned short uip_stats_t;
@@ -194,7 +195,7 @@ typedef unsigned short uip_stats_t;
 #define UIP_CONF_DHCP_LIGHT      1
 
 
-#if 1 /* No radio cycling */
+#if 0 /* No radio cycling */
 
 #define NETSTACK_CONF_MAC         nullmac_driver
 #define NETSTACK_CONF_RDC         sicslowmac_driver
@@ -202,7 +203,7 @@ typedef unsigned short uip_stats_t;
 #define NETSTACK_CONF_RADIO       rf230_driver
 #define CHANNEL_802_15_4          26
 /* AUTOACK receive mode gives better rssi measurements, even if ACK is never requested */
-#define RF230_CONF_AUTOACK        1
+#define RF230_CONF_AUTOACK        0
 /* Request 802.15.4 ACK on all packets sent (else autoretry). This is primarily for testing. */
 #define SICSLOWPAN_CONF_ACK_ALL   0
 /* 1 + Number of auto retry attempts 0-15 (0 implies don't use extended TX_ARET_ON mode) */
@@ -254,10 +255,10 @@ typedef unsigned short uip_stats_t;
 /* Not tested much yet */
 #define WITH_PHASE_OPTIMIZATION                0
 #define CONTIKIMAC_CONF_COMPOWER               1
-#define RIMESTATS_CONF_ENABLED                 1
+#define RIMESTATS_CONF_ENABLED                 0
 
 #if NETSTACK_CONF_WITH_IPV6
-#define NETSTACK_CONF_FRAMER      framer802154
+#define NETSTACK_CONF_FRAMER      framer_802154
 #else /* NETSTACK_CONF_WITH_IPV6 */
 #define NETSTACK_CONF_FRAMER      contikimac_framer
 #endif /* NETSTACK_CONF_WITH_IPV6 */
@@ -266,7 +267,7 @@ typedef unsigned short uip_stats_t;
 #define CHANNEL_802_15_4          26
 /* The radio needs to interrupt during an rtimer interrupt */
 #define RTIMER_CONF_NESTED_INTERRUPTS 1
-#define RF230_CONF_AUTOACK        1
+#define RF230_CONF_AUTOACK        0
 /* A 0 here means non-extended mode; 1 means extended mode with no retry, >1 for retrys */
 /* Contikimac strobes on its own, but hardware retries are faster */
 #define RF230_CONF_FRAME_RETRIES  1
@@ -305,7 +306,7 @@ typedef unsigned short uip_stats_t;
 #define NETSTACK_CONF_FRAMER      framer_802154
 #define NETSTACK_CONF_RADIO       rf230_driver
 #define CHANNEL_802_15_4          26
-#define RF230_CONF_AUTOACK        1
+#define RF230_CONF_AUTOACK        0
 #define SICSLOWPAN_CONF_FRAG      1
 #define SICSLOWPAN_CONF_MAXAGE    3
 #define CXMAC_CONF_ANNOUNCEMENTS  0
