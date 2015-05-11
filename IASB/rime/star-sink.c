@@ -1,9 +1,8 @@
 #include "contiki.h"
 #include "net/rime/rime.h"
-
 #include "i2c_sensors_interface.h"
-#include "sensors.h"
-
+#include "io_access.h"
+//#include "sensors.h"
 #include <stdio.h>
 #include <util/delay.h>
 
@@ -57,33 +56,16 @@ static void print_results(const temperature_t* temp, const luminosity_t* lumi, c
 }
 
 /* This function is called whenever a broadcast message is received. */
-//static void
-//broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from)
-//{
-//  char *m;
-//
-//
-//  /* The packetbuf_dataptr() returns a pointer to the first data byte
-//     in the received packet. */
-//  m = packetbuf_dataptr();
-//
-//  // allocate memory for sink address
-//  if(sink_addr == 0) {
-//	  sink_addr = memb_alloc(&sinkaddress);
-//  }
-//  if(!strcmp((char *)m, "Im a sink!")) {
-//	  if(!linkaddr_cmp(sink_addr, from)){
-//		  linkaddr_copy(sink_addr, from);
-//		  printf("New sink discovered: %d,%d\n", from->u8[0], from->u8[1]);
-//	  }
-//
-//  }
-//}
+static void
+broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from)
+{
+
+}
 
 /* This is where we define what function to be called when a broadcast
    is received. We pass a pointer to this structure in the
    broadcast_open() call below. */
-//static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
+static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
 
 /*---------------------------------------------------------------------------*/
 
@@ -114,15 +96,17 @@ PROCESS_THREAD(broadcast_process, ev, data)
   PROCESS_BEGIN();
 
   printf("STAR-SINK started!\n");
+  led_set(LED_0, LED_ON);
+  led_set(LED_1, LED_ON);
 
-  broadcast_open(&broadcast, 129, NULL /*&broadcast_call*/);
+  broadcast_open(&broadcast, 129, &broadcast_call);
 
   static struct etimer et;
   etimer_set(&et, CLOCK_SECOND * 30);
 
   while(1) {
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    packetbuf_copyfrom("I'm a sink!", 11);
+    packetbuf_copyfrom("I'm a sink!", 12);
     broadcast_send(&broadcast);
     etimer_reset(&et);
   }

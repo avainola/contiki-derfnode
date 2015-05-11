@@ -1,6 +1,8 @@
 #include "contiki.h"
 #include "net/rime/rime.h"
 #include "i2c_sensors_interface.h"
+#include "twi_master.h"
+#include "io_access.h"
 #include "sensors.h"
 #include <stdio.h>
 #include <util/delay.h>
@@ -13,7 +15,7 @@ struct unicast_message {
 };
 
 MEMB(sinkaddress, linkaddr_t, 1);
-static const linkaddr_t *sink_addr;
+static linkaddr_t *sink_addr;
 
 /* These hold the broadcast and unicast structures, respectively. */
 static struct broadcast_conn broadcast;
@@ -31,32 +33,6 @@ AUTOSTART_PROCESSES(&broadcast_process, &unicast_process);
 
 /*---------------------------------------------------------------------------*/
 
-/* Helper function for console printout
-   Prints the received sensor parameters values.*/
-//static void print_results(const temperature_t* temp, const luminosity_t* lumi, const acceleration_t* accel)
-//{
-//   /* print current temperature */
-//   printf("Temperature: %c%d.%02d C\n", (temp->sign ? '-' : '+'),
-//                                    	temp->integralDigit,
-//                                    	temp->fractionalDigit);
-//
-//   /* print current luminosity sensor value */
-//   printf("Luminosity: %d Lux\n", *lumi);
-//
-//   /* print current acceleration values */
-//   printf("Acceleration: x: %c%d.%02d g\n", accel->acc_x_sign ? '-' : '+',
-//									  	accel->acc_x_integral,
-//                                        accel->acc_x_fractional);
-//
-//   printf("              y: %c%d.%02d g\n", accel->acc_y_sign ? '-' : '+',
-//                                        accel->acc_y_integral,
-//                                        accel->acc_y_fractional);
-//
-//   printf("              z: %c%d.%02d g\n", accel->acc_z_sign ? '-' : '+',
-//                                        accel->acc_z_integral,
-//                                        accel->acc_z_fractional);
-//}
-
 /* This function is called whenever a broadcast message is received. */
 static void
 broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from)
@@ -72,12 +48,11 @@ broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from)
   if(sink_addr == 0) {
 	  sink_addr = memb_alloc(&sinkaddress);
   }
-  if(!strcmp((char *)m, "Im a sink!")) {
+  if(!strcmp(packetbuf_dataptr(), "I'm a sink!")) {
 	  if(!linkaddr_cmp(sink_addr, from)){
 		  linkaddr_copy(sink_addr, from);
 		  printf("New sink discovered: %d,%d\n", from->u8[0], from->u8[1]);
 	  }
-
   }
 }
 
@@ -89,20 +64,12 @@ static const struct broadcast_callbacks broadcast_call = {broadcast_recv};
 /*---------------------------------------------------------------------------*/
 
 /* This function is called for every incoming unicast packet. */
-//static void
-//recv_uc(struct unicast_conn *c, const linkaddr_t *from)
-//{
-//  struct unicast_message *msg;
-//
-//  /* Grab the pointer to the incoming data. */
-//  msg = packetbuf_dataptr();
-//
-//  printf("\n");
-//  printf("   DATA FROM   %d,%d   \n", from->u8[0], from->u8[1]);
-//  print_results(&msg->temp, &msg->lumi, &msg->accel);
-//
-//}
-//static const struct unicast_callbacks unicast_callbacks = {recv_uc};
+static void
+recv_uc(struct unicast_conn *c, const linkaddr_t *from)
+{
+
+}
+static const struct unicast_callbacks unicast_callbacks = {recv_uc};
 
 /*---------------------------------------------------------------------------*/
 
@@ -135,10 +102,19 @@ PROCESS_THREAD(unicast_process, ev, data)
   PROCESS_BEGIN();
 
   printf("STAR-NODE started!\n");
+  led_set(LED_0, LED_ON);
 
-  unicast_open(&unicast, 146, NULL /*&unicast_callbacks*/);
+  unicast_open(&unicast, 146, &unicast_callbacks);
 
   memb_init(&sinkaddress);
+
+  /* initialize TWI interface and connected sensors */
+  TWI_MasterInit();
+  BMA150_Init();
+  ISL29020_Init();
+  TMP102_Init();
+
+  static struct unicast_message msg;
 
   static struct etimer et;
   etimer_set(&et, CLOCK_SECOND * 17);
@@ -149,7 +125,6 @@ PROCESS_THREAD(unicast_process, ev, data)
 
     if(sink_addr != 0)
     {
-      struct unicast_message msg;
 
       /* measure temperature */
       while(TMP102_WakeUp());
