@@ -35,6 +35,9 @@
 
 #include "net/netstack.h"
 #include "dev/button-sensor.h"
+
+#include "io_access.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -65,7 +68,8 @@ tcpip_handler(void)
     appdata[uip_datalen()] = 0;
     PRINTF("DATA recv '%s' from ", appdata);
     PRINTF("%d",
-           UIP_IP_BUF->srcipaddr.u8[sizeof(UIP_IP_BUF->srcipaddr.u8) - 1]);
+//           UIP_IP_BUF->srcipaddr.u8[sizeof(UIP_IP_BUF->srcipaddr.u8) - 1]);
+    	   UIP_IP_BUF->srcipaddr.u8[9]);
     PRINTF("\n");
 #if SERVER_REPLY
     PRINTF("DATA sending reply\n");
@@ -82,7 +86,7 @@ print_local_addresses(void)
   int i;
   uint8_t state;
 
-  PRINTF("Server IPv6 addresses: ");
+  PRINTF("Server IPv6 addresses: \n");
   for(i = 0; i < UIP_DS6_ADDR_NB; i++) {
     state = uip_ds6_if.addr_list[i].state;
     if(state == ADDR_TENTATIVE || state == ADDR_PREFERRED) {
@@ -108,6 +112,8 @@ PROCESS_THREAD(udp_server_process, ev, data)
   SENSORS_ACTIVATE(button_sensor);
 
   PRINTF("UDP server started\n");
+  led_set(LED_0, LED_ON);
+  led_set(LED_1, LED_ON);
 
 #if UIP_CONF_ROUTER
 /* The choice of server address determines its 6LoPAN header compression.

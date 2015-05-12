@@ -1,6 +1,5 @@
 all: udp-client udp-server
 APPS=servreg-hack
-CONTIKI=../../..
 
 ifdef WITH_COMPOWER
 APPS+=powertrace
@@ -15,4 +14,5 @@ CFLAGS+=-DPERIOD=$(PERIOD)
 endif
 
 CONTIKI_WITH_IPV6 = 1
+CONTIKI=../..
 include $(CONTIKI)/Makefile.include

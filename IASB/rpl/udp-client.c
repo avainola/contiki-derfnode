@@ -37,6 +37,7 @@
 #ifdef WITH_COMPOWER
 #include "powertrace.h"
 #endif
+#include "io_access.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -96,7 +97,7 @@ print_local_addresses(void)
   int i;
   uint8_t state;
 
-  PRINTF("Client IPv6 addresses: ");
+  PRINTF("Client IPv6 addresses: \n");
   for(i = 0; i < UIP_DS6_ADDR_NB; i++) {
     state = uip_ds6_if.addr_list[i].state;
     if(uip_ds6_if.addr_list[i].isused &&
@@ -158,6 +159,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
   set_global_address();
   
   PRINTF("UDP client process started\n");
+  led_set(LED_0, LED_ON);
 
   print_local_addresses();
 
