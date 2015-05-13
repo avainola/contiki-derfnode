@@ -1,7 +1,7 @@
 
 all: webserver6
 
-APPS=raven-webserver raven-lcd-interface
+APPS=raven-webserver #raven-lcd-interface
 TARGET=avr-raven
 
 #RF230BB=1             //Use radio driver that communicates with the core MAC layer. Now the default.
